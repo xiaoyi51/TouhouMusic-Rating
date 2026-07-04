@@ -239,6 +239,7 @@ export function useRating() {
                 comment: editing.comment,
             }),
         });
+        setDirty(false);
 
         if (!res.ok) {
             alert("评分保存失败");
