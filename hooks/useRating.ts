@@ -20,17 +20,6 @@ type RatingRow = {
 
 export function useRating() {
     const [nextImageReady, setNextImageReady] = useState(false);
-const songImage = songs.find(s => s.id === currentSongId)?.image;
-useEffect(() => {
-    if (!songImage) return;
-
-    const img = new Image();
-
-    img.onload = () => setNextImageReady(true);
-    img.onerror = () => setNextImageReady(false);
-
-    img.src = songImage;
-}, [songImage]);
 
     // ========================
     // 当前歌曲（✔ 持久化修复）
@@ -42,6 +31,16 @@ useEffect(() => {
 
     const song = songs.find(s => s.id === currentSongId);
     if (!song) throw new Error("Song not found");
+    useEffect(() => {
+    if (!song?.image) return;
+
+    const img = new Image();
+
+    img.onload = () => setNextImageReady(true);
+    img.onerror = () => setNextImageReady(false);
+
+    img.src = song.image;
+}, [song?.image]);
 
     // ========================
     // 编辑状态
@@ -116,10 +115,6 @@ useEffect(() => {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     }, [currentSongId]);
-    useEffect(() => {
-    const img = new Image();
-    img.src = song.image;
-}, [song.image]);
 
     // ========================
     // 保存评分
