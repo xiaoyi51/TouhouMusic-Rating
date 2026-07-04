@@ -136,6 +136,7 @@ export function useRating() {
 
         return res.ok;
     }
+    const [dirty, setDirty] = useState(false);
 
     // ========================
     // 切歌（✔ 修复：不读旧 ratingsMap）
@@ -145,42 +146,32 @@ export function useRating() {
     const current = songs.find(s => s.id === currentSongId);
     if (!current) return;
 
-    // ========================
-    // 🚨 判断是否“真实修改过”
-    // ========================
-    const record = ratingsMap[current.id];
-
-    const hasRealEdit =
-        editing.rating !== 5 || editing.comment !== "";
-
-    // ========================
-    // 🚨 如果有修改 → 提示是否保存
-    // ========================
-    if (hasRealEdit) {
+    // 🚨 只有真的改过才提示
+    if (dirty) {
         const ok = confirm("当前评分尚未保存，是否保存？");
 
-        if (!ok) {
+        if (ok) {
             await saveRating(
                 current.id,
                 editing.rating,
                 editing.comment
             );
+        } else {
+            return; // ❗取消就不切歌
         }
-        return
     }
 
-    // ⭐先切歌
     setCurrentSongId(songId);
     localStorage.setItem("currentSongId", String(songId));
 
-    // ⭐再刷新数据
-    const updated = await refreshRatings();
+    setDirty(false); // ⭐关键：清状态
 
-    const newRecord = updated[songId];
+    const updated = await refreshRatings();
+    const record = updated[songId];
 
     setEditing({
-        rating: newRecord?.rating ?? 5,
-        comment: newRecord?.comment ?? "",
+        rating: record?.rating ?? 5,
+        comment: record?.comment ?? "",
     });
 }
 
@@ -218,8 +209,7 @@ export function useRating() {
     const handleSubmit = async () => {
 
         if (loadingNext) return;
-        const hasRealEdit =
-        editing.rating !== 5 || editing.comment !== "";
+        const hasRealEdit = dirty;
 
     // 🚨 没修改就不允许提交
     if (!hasRealEdit) {
@@ -297,6 +287,7 @@ export function useRating() {
         totalCount,
         finishedCount,
         goPrevSong,
+        dirty,setDirty,
         goNextSongSequential,
     };
 }

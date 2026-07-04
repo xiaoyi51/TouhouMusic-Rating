@@ -24,6 +24,7 @@ export default function RatingPage() {
     goPrevSong,
     goNextSongSequential,
     ratingsMap,
+    setDirty,
 
 } = useRating();
 const [songListOpen, setSongListOpen] = useState(false);
@@ -547,12 +548,13 @@ const [songListOpen, setSongListOpen] = useState(false);
              max={10}
              step={0.01}
              value={Number(editing.rating) || 0}
-             onChange={(e) =>
+             onChange={(e) =>{
+                setDirty(true);
                 setEditing((prev) => ({
                      ...prev,
                      rating: Number(e.target.value),
     }))
-  }
+             }}
   className="h-2 w-full cursor-pointer accent-[#9a7086] relative z-50"
 />
 
@@ -664,10 +666,12 @@ const [songListOpen, setSongListOpen] = useState(false);
 
                 value={editing.comment}
 
-                onChange={(e)=>setEditing(prev => ({
+                onChange={(e)=>{
+                    setDirty(true);
+                    setEditing(prev => ({
     ...prev,
     comment: e.target.value,
-}))}
+}))}}
 
                 placeholder="写下你对这首曲目的第一印象吧..."
 
