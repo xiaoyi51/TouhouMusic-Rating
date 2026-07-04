@@ -240,6 +240,13 @@ export function useRating() {
             }),
         });
 console.log("status =", res.status);
+console.log(currentSongId);
+console.log(JSON.stringify({
+    user_id,
+    song_id: currentSongId,
+    rating: editing.rating,
+    comment: editing.comment,
+}));
         if (!res.ok) {
             alert("评分保存失败");
             setSubmitted(false);
