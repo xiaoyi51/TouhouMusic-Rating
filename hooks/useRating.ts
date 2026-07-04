@@ -165,8 +165,8 @@ export function useRating() {
                 editing.rating,
                 editing.comment
             );
-            return
         }
+        return
     }
 
     // ⭐先切歌
