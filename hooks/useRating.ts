@@ -239,7 +239,7 @@ export function useRating() {
                 comment: editing.comment,
             }),
         });
-
+console.log("status =", res.status);
         if (!res.ok) {
             alert("评分保存失败");
             setSubmitted(false);
