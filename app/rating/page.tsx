@@ -216,7 +216,7 @@ const [songListOpen, setSongListOpen] = useState(false);
 
         <div className="mt-10 max-w-140">
 
-    <RatingMusicPlayer key={song.id} song={song}/>
+    <RatingMusicPlayer  song={song}/>
 
 </div>
 
