@@ -50,35 +50,59 @@ export default function ProfilePage() {
     }, []);
 
     // ===== 删除评分 =====
-    async function deleteRating(song_id: number) {
-        const user_id = localStorage.getItem("user_id");
+async function deleteRating(user_id: string, song_id: number) {
+    const { error } = await supabase
+        .from("rating")
+        .delete()
+        .eq("user_id", user_id)
+        .eq("song_id", song_id);
 
-        const res = await fetch("/api/delete_rating", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user_id, song_id }),
-        });
-
-        if (res.ok) {
-            setRatings(prev => prev.filter(r => r.song_id !== song_id));
-        }
+    if (error) {
+        console.error(error);
+        return false;
     }
+    const ok = await deleteRating(user_id, song_id);
+
+if (!ok) {
+    alert("删除失败");
+}
+    return true;
+}
+
 
     // ===== 删除账号 =====
-    async function deleteAccount() {
-        const user_id = localStorage.getItem("user_id");
+ async function deleteAccount() {
+    const user_id = localStorage.getItem("user_id");
+    if (!user_id) return;
 
-        const res = await fetch("/api/delete_account", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user_id }),
-        });
+    // 1. 删除评分
+    const { error: ratingError } = await supabase
+        .from("rating")
+        .delete()
+        .eq("user_id", user_id);
 
-        if (res.ok) {
-            localStorage.removeItem("user_id");
-            window.location.href = "/";
-        }
+    if (ratingError) {
+        console.error(ratingError);
+        alert("删除评分失败");
+        return;
     }
+
+    // 2. 删除用户
+    const { error: userError } = await supabase
+        .from("users")
+        .delete()
+        .eq("id", user_id);
+
+    if (userError) {
+        console.error(userError);
+        alert("删除用户失败");
+        return;
+    }
+
+    // 3. 成功后清理本地状态
+    localStorage.removeItem("user_id");
+    window.location.href = "/";
+}
 
     // ===== 保存修改评分 =====
     async function saveEdit(song_id: number) {
@@ -169,7 +193,7 @@ export default function ProfilePage() {
                             {/* 删除 */}
                             <button
                                 className="text-red-500"
-                                onClick={() => deleteRating(item.song_id)}
+                                onClick={() => deleteRating(item.comment,item.song_id)}
                             >
                                 删除
                             </button>

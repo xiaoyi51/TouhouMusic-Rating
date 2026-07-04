@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -16,48 +17,50 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        nickname,
-        password,
-      }),
-    });
-
-    const data = await res.json();
-    console.log(data);
-
-if (!res.ok) {
-    alert(data.message);
-    return;}
-
-    setLoading(false);
-
-    if (!res.ok) {
-      setError(data.message || "登录失败");
+    if (!nickname || !password) {
+      setError("请输入昵称和密码");
+      setLoading(false);
       return;
     }
 
-    // 登录成功 → 去评分页
-    // 保存登录信息
-localStorage.setItem("user_id", data.user.id);
-localStorage.setItem("nickname", data.user.nickname);
+    // 1. 查询用户
+    const { data: user, error: queryError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("nickname", nickname)
+      .single();
 
+    if (queryError || !user) {
+      setError("用户不存在");
+      setLoading(false);
+      return;
+    }
+
+    // 2. 密码校验（当前简化版）
+    if (password !== user.password_hash) {
+      setError("密码错误");
+      setLoading(false);
+      return;
+    }
+
+    // 3. 登录成功
+    localStorage.setItem("user_id", user.id);
+    localStorage.setItem("nickname", user.nickname);
+
+    setLoading(false);
     router.push("/rating");
   }
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-stone-50 text-stone-800">
       <div className="w-full max-w-md space-y-6 p-8 border border-stone-300 rounded-lg bg-white">
-        
+
         <h1 className="text-2xl font-semibold text-center">
           登录
         </h1>
 
         <div className="space-y-3">
+
           <input
             className="w-full border border-stone-300 px-3 py-2 rounded"
             placeholder="昵称"
@@ -84,6 +87,7 @@ localStorage.setItem("nickname", data.user.nickname);
           >
             {loading ? "登录中..." : "登录"}
           </button>
+
         </div>
 
         <p className="text-sm text-center text-stone-500">
@@ -92,6 +96,7 @@ localStorage.setItem("nickname", data.user.nickname);
             立即注册
           </Link>
         </p>
+
       </div>
     </main>
   );

@@ -120,22 +120,28 @@ export function useRating() {
     // 保存评分
     // ========================
     async function saveRating(songId: number, rating: number, comment: string) {
-        const user_id = localStorage.getItem("user_id");
-        if (!user_id) return false;
+    const user_id = localStorage.getItem("user_id");
+    if (!user_id) return false;
 
-        const res = await fetch("/api/rating", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                user_id,
-                song_id: currentSongId,
-                rating,
-                comment,
-            }),
+    const { error } = await supabase
+        .from("rating")
+        .upsert({
+            user_id,
+            song_id: songId,
+            rating,
+            comment,
+            updated_at: new Date().toISOString(),
+        }, {
+            onConflict: "user_id,song_id",
         });
 
-        return res.ok;
+    if (error) {
+        console.error(error);
+        return false;
     }
+
+    return true;
+}
     const [dirty, setDirty] = useState(false);
 
     // ========================
@@ -206,75 +212,68 @@ export function useRating() {
     // ========================
     // 提交评分（✔ 修复 stale state）
     // ========================
-    const handleSubmit = async () => {
+   const handleSubmit = async () => {
+    if (loadingNext) return;
 
-        if (loadingNext) return;
-        const hasRealEdit = dirty;
-
-    // 🚨 没修改就不允许提交
-    if (!hasRealEdit) {
+    if (!dirty) {
         alert("你还没有修改评分");
         return;
     }
 
-        setSubmitted(true);
-        setLoadingNext(true);
+    setSubmitted(true);
+    setLoadingNext(true);
 
-        const user_id = localStorage.getItem("user_id");
+    const user_id = localStorage.getItem("user_id");
 
-        if (!user_id) {
-            alert("请先登录！");
-            setSubmitted(false);
-            setLoadingNext(false);
-            return;
-        }
-
-        const body = {
-    user_id,
-    song_id: currentSongId,
-    rating: editing.rating,
-    comment: editing.comment,
-};
-
-console.log("准备提交：", body);
-console.log("currentSongId =", currentSongId);
-console.log("song =", song);
-
-const res = await fetch("/api/rating", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-});
-console.log("status =", res.status);
-        if (!res.ok) {
-            alert("评分保存失败");
-            setSubmitted(false);
-            setLoadingNext(false);
-            return;
-        }
-        setDirty(false);
-        // ⭐关键：拿最新数据
-        const updated = await refreshRatings();
-
-        const unRatedSongs = songs.filter(s =>
-            s.id !== 0 && !updated[s.id]
-        );
-
-        if (unRatedSongs.length > 0) {
-            const nextSong =
-                unRatedSongs[Math.floor(Math.random() * unRatedSongs.length)];
-
-            await switchSong(nextSong.id);
-        } else {
-            alert("🎉 恭喜！所有歌曲已经全部完成！");
-        }
-
+    if (!user_id) {
+        alert("请先登录！");
         setSubmitted(false);
         setLoadingNext(false);
-    };
+        return;
+    }
 
+    const { error } = await supabase
+        .from("rating")
+        .upsert({
+            user_id,
+            song_id: currentSongId,
+            rating: editing.rating,
+            comment: editing.comment,
+            updated_at: new Date().toISOString(),
+        }, {
+            onConflict: "user_id,song_id",
+        });
+
+    console.log("supabase upsert error =", error);
+
+    if (error) {
+        alert("评分保存失败");
+        setSubmitted(false);
+        setLoadingNext(false);
+        return;
+    }
+
+    setDirty(false);
+
+    // ⭐关键：刷新数据
+    const updated = await refreshRatings();
+
+    const unRatedSongs = songs.filter(s =>
+        s.id !== 0 && !updated[s.id]
+    );
+
+    if (unRatedSongs.length > 0) {
+        const nextSong =
+            unRatedSongs[Math.floor(Math.random() * unRatedSongs.length)];
+
+        await switchSong(nextSong.id);
+    } else {
+        alert("🎉 恭喜！所有歌曲已经全部完成！");
+    }
+
+    setSubmitted(false);
+    setLoadingNext(false);
+};
     // ========================
     // 统计
     // ========================

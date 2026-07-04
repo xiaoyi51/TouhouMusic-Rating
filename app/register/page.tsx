@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -15,50 +16,59 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
 
   async function handleRegister() {
-    setError("");
+  setError("");
 
-    if (!nickname || !password) {
-      setError("请填写完整信息");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("两次密码不一致");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nickname,
-          password,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "注册失败");
-        setLoading(false);
-        return;
-      }
-
-      setLoading(false);
-
-      alert("注册成功，请登录");
-      router.push("/login");
-
-    } catch (err) {
-      setLoading(false);
-      setError("网络错误，请稍后再试");
-    }
+  if (!nickname || !password) {
+    setError("请填写完整信息");
+    return;
   }
+
+  if (password !== confirmPassword) {
+    setError("两次密码不一致");
+    return;
+  }
+
+  setLoading(true);
+
+  // 1. 检查是否存在
+  const { data: exist } = await supabase
+    .from("users")
+    .select("id")
+    .eq("nickname", nickname)
+    .maybeSingle();
+
+  if (exist) {
+    setError("昵称已存在");
+    setLoading(false);
+    return;
+  }
+
+  // 2. ⚠️ 简化密码（先不 hash，避免 Cloudflare / browser 问题）
+  const password_hash = password;
+
+  // 3. 插入用户
+  const { data, error } = await supabase
+    .from("users")
+    .insert([
+      {
+        nickname,
+        password_hash,
+      },
+    ])
+    .select()
+    .single();
+
+  if (error || !data) {
+    setError(error?.message || "注册失败");
+    setLoading(false);
+    return;
+  }
+
+  setLoading(false);
+
+  alert("注册成功，请登录");
+  router.push("/login");
+}
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-stone-50 text-stone-800">
