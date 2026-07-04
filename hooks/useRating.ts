@@ -104,6 +104,10 @@ export function useRating() {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     }, [currentSongId]);
+    useEffect(() => {
+    const img = new Image();
+    img.src = song.image;
+}, [song.image]);
 
     // ========================
     // 保存评分
