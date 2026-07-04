@@ -234,7 +234,7 @@ export function useRating() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 user_id,
-                songId: currentSongId,
+                song_id: song.id,
                 rating: editing.rating,
                 comment: editing.comment,
             }),
