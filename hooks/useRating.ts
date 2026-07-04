@@ -165,6 +165,7 @@ export function useRating() {
                 editing.rating,
                 editing.comment
             );
+            return
         }
     }
 
