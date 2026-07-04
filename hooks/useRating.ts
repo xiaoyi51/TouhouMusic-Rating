@@ -142,25 +142,46 @@ export function useRating() {
     // ========================
     async function switchSong(songId: number) {
 
-        const current = songs.find(s => s.id === currentSongId);
-        if (!current) return;
+    const current = songs.find(s => s.id === currentSongId);
+    if (!current) return;
 
-        await saveRating(current.id, editing.rating, editing.comment);
+    // ========================
+    // 🚨 判断是否“真实修改过”
+    // ========================
+    const record = ratingsMap[current.id];
 
-        // ⭐先切歌
-        setCurrentSongId(songId);
-        localStorage.setItem("currentSongId", String(songId));
+    const hasRealEdit =
+        editing.rating !== 5 || editing.comment !== "";
 
-        // ⭐再刷新数据（关键）
-        const updated = await refreshRatings();
+    // ========================
+    // 🚨 如果有修改 → 提示是否保存
+    // ========================
+    if (hasRealEdit) {
+        const ok = confirm("当前评分尚未保存，是否保存？");
 
-        const record = updated[songId];
-
-        setEditing({
-            rating: record?.rating ?? 5,
-            comment: record?.comment ?? "",
-        });
+        if (ok) {
+            await saveRating(
+                current.id,
+                editing.rating,
+                editing.comment
+            );
+        }
     }
+
+    // ⭐先切歌
+    setCurrentSongId(songId);
+    localStorage.setItem("currentSongId", String(songId));
+
+    // ⭐再刷新数据
+    const updated = await refreshRatings();
+
+    const newRecord = updated[songId];
+
+    setEditing({
+        rating: newRecord?.rating ?? 5,
+        comment: newRecord?.comment ?? "",
+    });
+}
 
     // ========================
     // 上一首 / 下一首
@@ -196,6 +217,14 @@ export function useRating() {
     const handleSubmit = async () => {
 
         if (loadingNext) return;
+        const hasRealEdit =
+        editing.rating !== 5 || editing.comment !== "";
+
+    // 🚨 没修改就不允许提交
+    if (!hasRealEdit) {
+        alert("你还没有修改评分");
+        return;
+    }
 
         setSubmitted(true);
         setLoadingNext(true);
