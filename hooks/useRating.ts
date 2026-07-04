@@ -159,7 +159,7 @@ export function useRating() {
     if (hasRealEdit) {
         const ok = confirm("当前评分尚未保存，是否保存？");
 
-        if (ok) {
+        if (!ok) {
             await saveRating(
                 current.id,
                 editing.rating,
