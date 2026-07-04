@@ -229,24 +229,25 @@ export function useRating() {
             return;
         }
 
-        const res = await fetch("/api/rating", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                user_id,
-                song_id: currentSongId,
-                rating: editing.rating,
-                comment: editing.comment,
-            }),
-        });
-console.log("status =", res.status);
-console.log(currentSongId);
-console.log(JSON.stringify({
+        const body = {
     user_id,
     song_id: currentSongId,
     rating: editing.rating,
     comment: editing.comment,
-}));
+};
+
+console.log("准备提交：", body);
+console.log("currentSongId =", currentSongId);
+console.log("song =", song);
+
+const res = await fetch("/api/rating", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+});
+console.log("status =", res.status);
         if (!res.ok) {
             alert("评分保存失败");
             setSubmitted(false);
