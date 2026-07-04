@@ -14,6 +14,22 @@ export default function LoginPage() {
   const [error, setError] = useState("");
 
   async function handleLogin() {
+
+  setLoading(true);
+  setError("");
+
+  console.log("login start");
+
+  const { data, error } = await supabase
+    .from("users")
+    .select("*");
+
+  console.log("ALL USERS:", data);
+  console.log("ERROR:", error);
+
+  setLoading(false);
+
+
     setLoading(true);
     setError("");
 
