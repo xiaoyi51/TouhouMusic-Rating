@@ -21,6 +21,18 @@ export default function RatingMusicPlayer({ song }: Props) {
     const [duration, setDuration] = useState(0);
 
     const [volume, setVolume] = useState(1);
+    useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.pause();
+    audio.currentTime = 0;
+    audio.src = song.audio;
+    audio.load();
+
+    setPlaying(false);
+    setCurrentTime(0);
+}, [song.audio]);
 
     // 播放暂停
 

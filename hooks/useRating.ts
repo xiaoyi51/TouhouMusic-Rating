@@ -19,6 +19,18 @@ type RatingRow = {
 };
 
 export function useRating() {
+    const [nextImageReady, setNextImageReady] = useState(false);
+const songImage = songs.find(s => s.id === currentSongId)?.image;
+useEffect(() => {
+    if (!songImage) return;
+
+    const img = new Image();
+
+    img.onload = () => setNextImageReady(true);
+    img.onerror = () => setNextImageReady(false);
+
+    img.src = songImage;
+}, [songImage]);
 
     // ========================
     // 当前歌曲（✔ 持久化修复）
