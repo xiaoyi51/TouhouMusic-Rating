@@ -25,16 +25,16 @@ export default function LoginPage() {
 
     // 1. 查询用户
     const { data: user, error: queryError } = await supabase
-      .from("users")
-      .select("*")
-      .eq("nickname", nickname)
-      .single();
+  .from("users")
+  .select("*")
+  .eq("nickname", nickname)
+  .maybeSingle();
 
-    if (queryError || !user) {
-      setError("用户不存在");
-      setLoading(false);
-      return;
-    }
+if (queryError || !user) {
+  setError("用户不存在");
+  setLoading(false);
+  return;
+}
 
     // 2. 密码校验（当前简化版）
     if (password !== user.password_hash) {
