@@ -239,7 +239,6 @@ export function useRating() {
                 comment: editing.comment,
             }),
         });
-        setDirty(false);
 
         if (!res.ok) {
             alert("评分保存失败");
@@ -247,7 +246,7 @@ export function useRating() {
             setLoadingNext(false);
             return;
         }
-
+        setDirty(false);
         // ⭐关键：拿最新数据
         const updated = await refreshRatings();
 
