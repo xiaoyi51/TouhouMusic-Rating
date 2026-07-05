@@ -2,6 +2,7 @@ import { songs } from "@/data/songs";
 import { useEffect, useState, useCallback } from "react";
 import type { RatingRecord } from "@/data/rating";
 import { supabase } from "@/lib/supabase";
+import { useSearchParams } from "next/navigation";
 
 type EditingState = {
     rating: number;
@@ -20,10 +21,20 @@ export function useRating() {
     // ========================
     // 当前歌曲
     // ========================
-    const [currentSongId, setCurrentSongId] = useState<number>(() => {
-        if (typeof window === "undefined") return 1;
-        return Number(localStorage.getItem("currentSongId")) || 1;
-    });
+const searchParams = useSearchParams();
+const urlSongId = Number(searchParams.get("songId"));
+const [currentSongId, setCurrentSongId] = useState<number>(() => {
+    if (typeof window === "undefined") return 1;
+
+    // 1️⃣ URL 优先
+    if (urlSongId && !Number.isNaN(urlSongId) && urlSongId > 0) {
+        return urlSongId;
+    }
+
+    // 2️⃣ fallback localStorage
+    return Number(localStorage.getItem("currentSongId")) || 1;
+});
+
 
     const song = songs.find(s => s.id === currentSongId);
     if (!song) throw new Error("Song not found");

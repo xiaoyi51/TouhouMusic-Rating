@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { songs } from "@/data/songs";
+import { useRouter } from "next/navigation";
 
 type RatingItem = {
     song_id: number;
@@ -17,6 +18,7 @@ export default function ProfilePage() {
     const [ratings, setRatings] = useState<RatingItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+    const router = useRouter();
 
     const [editingId, setEditingId] = useState<number | null>(null);
     const [tempRating, setTempRating] = useState(5);
@@ -195,9 +197,12 @@ export default function ProfilePage() {
                         className="border rounded-xl p-4 bg-white shadow-sm space-y-2"
                     >
 
-                        <div className="font-medium">
-                            {getSongTitle(item.song_id)}
-                        </div>
+                        <div
+    className="font-medium cursor-pointer hover:underline"
+    onClick={() => router.push(`/rate?songId=${item.song_id}`)}
+>
+    {getSongTitle(item.song_id)}
+</div>
 
                         <div className="text-sm text-stone-600">
                             评分：<span className="font-semibold">{item.rating}</span>
