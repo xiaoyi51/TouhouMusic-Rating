@@ -1,5 +1,5 @@
 import { songs } from "@/data/songs";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import type { RatingRecord } from "@/data/rating";
 import { supabase } from "@/lib/supabase";
 
@@ -13,16 +13,12 @@ type RatingRow = {
     rating: number;
     comment: string;
     updated_at: string;
-    users?: {
-        nickname: string;
-    };
 };
 
 export function useRating() {
-    const [nextImageReady, setNextImageReady] = useState(false);
 
     // ========================
-    // 当前歌曲（✔ 持久化修复）
+    // 当前歌曲
     // ========================
     const [currentSongId, setCurrentSongId] = useState<number>(() => {
         if (typeof window === "undefined") return 1;
@@ -31,39 +27,34 @@ export function useRating() {
 
     const song = songs.find(s => s.id === currentSongId);
     if (!song) throw new Error("Song not found");
-    useEffect(() => {
-    if (!song?.image) return;
-
-    const img = new Image();
-
-    img.onload = () => setNextImageReady(true);
-    img.onerror = () => setNextImageReady(false);
-
-    img.src = song.image;
-}, [song?.image]);
 
     // ========================
-    // 编辑状态
+    // UI state
     // ========================
     const [editing, setEditing] = useState<EditingState>({
         rating: 5,
         comment: "",
     });
 
-    // ========================
-    // ratingsMap（唯一数据源）
-    // ========================
-    const [ratingsMap, setRatingsMap] =
-        useState<Record<number, RatingRecord>>({});
-
+    const [ratingsMap, setRatingsMap] = useState<Record<number, RatingRecord>>({});
     const [submitted, setSubmitted] = useState(false);
     const [loadingNext, setLoadingNext] = useState(false);
+    const [dirty, setDirty] = useState(false);
 
     // ========================
-    // ⭐统一刷新函数（关键修复点）
+    // auth（统一入口）
     // ========================
-    const refreshRatings = async () => {
-        const user_id = localStorage.getItem("user_id");
+    const getUserId = useCallback(async () => {
+        const { data, error } = await supabase.auth.getUser();
+        if (error || !data.user) return null;
+        return data.user.id;
+    }, []);
+
+    // ========================
+    // fetch ratings（纯函数）
+    // ========================
+    const fetchRatings = useCallback(async () => {
+        const user_id = await getUserId();
         if (!user_id) return {};
 
         const { data, error } = await supabase
@@ -72,208 +63,197 @@ export function useRating() {
             .eq("user_id", user_id);
 
         if (error) {
-            console.error(error);
+            console.error("fetchRatings error:", error);
             return {};
         }
 
-        const mapped: Record<number, RatingRecord> = {};
+        const map: Record<number, RatingRecord> = {};
 
         data?.forEach((item: RatingRow) => {
-            mapped[item.song_id] = {
+            map[item.song_id] = {
                 rating: item.rating,
                 comment: item.comment,
                 updatedAt: item.updated_at,
-                nickname: item.users?.nickname,
             };
         });
 
-        setRatingsMap(mapped);
-        return mapped;
-    };
+        return map;
+    }, [getUserId]);
 
     // ========================
-    // 初始加载
+    // 初始化加载（修复 React warning）
     // ========================
-  useEffect(() => {
-    let mounted = true;
+    useEffect(() => {
+        const load = async () => {
+            const data = await fetchRatings();
+            setRatingsMap(data);
+        };
 
-    const run = async () => {
-        const data = await refreshRatings();
-        if (!mounted) return;
-    };
-
-    run();
-
-    return () => {
-        mounted = false;
-    };
-}, []);
+        load();
+    }, [fetchRatings]);
 
     // ========================
-    // 滚动
+    // 自动滚动
     // ========================
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     }, [currentSongId]);
 
     // ========================
-    // 保存评分
+    // 保存评分（RLS安全）
     // ========================
-    async function saveRating(songId: number, rating: number, comment: string) {
-    const user_id = localStorage.getItem("user_id");
-    if (!user_id) return false;
+    const saveRating = useCallback(async (
+        songId: number,
+        rating: number,
+        comment: string
+    ) => {
+        const user_id = await getUserId();
+        if (!user_id) return false;
 
-    const { error } = await supabase
-        .from("rating")
-        .upsert({
-            user_id,
-            song_id: songId,
-            rating,
-            comment,
-            updated_at: new Date().toISOString(),
-        }, {
-            onConflict: "user_id,song_id",
+        const { error } = await supabase
+            .from("rating")
+            .upsert({
+                user_id,
+                song_id: songId,
+                rating,
+                comment,
+                updated_at: new Date().toISOString(),
+            }, {
+                onConflict: "user_id,song_id",
+            });
+
+        if (error) {
+            console.error("saveRating error:", error);
+            return false;
+        }
+
+        return true;
+    }, [getUserId]);
+
+    // ========================
+    // 切歌
+    // ========================
+    const switchSong = useCallback(async (songId: number) => {
+
+        const current = songs.find(s => s.id === currentSongId);
+        if (!current) return;
+
+        if (dirty) {
+            const ok = confirm("当前评分尚未保存，是否保存？");
+
+            if (ok) {
+                await saveRating(current.id, editing.rating, editing.comment);
+            } else {
+                return;
+            }
+        }
+
+        setCurrentSongId(songId);
+        localStorage.setItem("currentSongId", String(songId));
+
+        setDirty(false);
+
+        const updated = await fetchRatings();
+        setRatingsMap(updated);
+
+        const record = updated[songId];
+
+        setEditing({
+            rating: record?.rating ?? 5,
+            comment: record?.comment ?? "",
         });
 
-    if (error) {
-        console.error(error);
-        return false;
-    }
-
-    return true;
-}
-    const [dirty, setDirty] = useState(false);
-
-    // ========================
-    // 切歌（✔ 修复：不读旧 ratingsMap）
-    // ========================
-    async function switchSong(songId: number) {
-
-    const current = songs.find(s => s.id === currentSongId);
-    if (!current) return;
-
-    // 🚨 只有真的改过才提示
-    if (dirty) {
-        const ok = confirm("当前评分尚未保存，是否保存？");
-
-        if (ok) {
-            await saveRating(
-                current.id,
-                editing.rating,
-                editing.comment
-            );
-        } else {
-            return; // ❗取消就不切歌
-        }
-    }
-
-    setCurrentSongId(songId);
-    localStorage.setItem("currentSongId", String(songId));
-
-    setDirty(false); // ⭐关键：清状态
-
-    const updated = await refreshRatings();
-    const record = updated[songId];
-
-    setEditing({
-        rating: record?.rating ?? 5,
-        comment: record?.comment ?? "",
-    });
-}
+    }, [currentSongId, dirty, editing, saveRating, fetchRatings]);
 
     // ========================
     // 上一首 / 下一首
     // ========================
-    const goPrevSong = async () => {
+    const goPrevSong = useCallback(async () => {
         if (currentSongId <= 1) return;
         await switchSong(currentSongId - 1);
-    };
+    }, [currentSongId, switchSong]);
 
-    const goNextSongSequential = async () => {
+    const goNextSongSequential = useCallback(async () => {
         if (currentSongId >= songs.length - 1) return;
         await switchSong(currentSongId + 1);
-    };
+    }, [currentSongId, switchSong]);
 
     // ========================
     // 随机未评分
     // ========================
-    const getRandomUnratedSong = () => {
-        const unRatedSongs = songs.filter(s =>
-            s.id !== 0 && !ratingsMap[s.id]
+    const getRandomUnratedSong = useCallback(() => {
+        const list = songs.filter(s => s.id !== 0 && !ratingsMap[s.id]);
+
+        if (list.length === 0) return null;
+
+        return list[Math.floor(Math.random() * list.length)];
+    }, [ratingsMap]);
+
+    // ========================
+    // 提交评分（最终安全版）
+    // ========================
+    const handleSubmit = useCallback(async () => {
+
+        if (loadingNext) return;
+
+        if (!dirty) {
+            alert("你还没有修改评分");
+            return;
+        }
+
+        setSubmitted(true);
+        setLoadingNext(true);
+
+        const user_id = await getUserId();
+
+        if (!user_id) {
+            alert("请先登录！");
+            setSubmitted(false);
+            setLoadingNext(false);
+            return;
+        }
+
+        const success = await saveRating(
+            currentSongId,
+            editing.rating,
+            editing.comment
         );
 
-        if (unRatedSongs.length === 0) return null;
+        if (!success) {
+            alert("评分保存失败");
+            setSubmitted(false);
+            setLoadingNext(false);
+            return;
+        }
 
-        return unRatedSongs[
-            Math.floor(Math.random() * unRatedSongs.length)
-        ];
-    };
+        setDirty(false);
 
-    // ========================
-    // 提交评分（✔ 修复 stale state）
-    // ========================
-   const handleSubmit = async () => {
-    if (loadingNext) return;
+        const updated = await fetchRatings();
+        setRatingsMap(updated);
 
-    if (!dirty) {
-        alert("你还没有修改评分");
-        return;
-    }
+        const unRated = songs.filter(s => s.id !== 0 && !updated[s.id]);
 
-    setSubmitted(true);
-    setLoadingNext(true);
+        if (unRated.length > 0) {
+            const next = unRated[Math.floor(Math.random() * unRated.length)];
+            await switchSong(next.id);
+        } else {
+            alert("🎉 已完成全部评分！");
+        }
 
-    const user_id = localStorage.getItem("user_id");
-
-    if (!user_id) {
-        alert("请先登录！");
         setSubmitted(false);
         setLoadingNext(false);
-        return;
-    }
 
-    const { error } = await supabase
-        .from("rating")
-        .upsert({
-            user_id,
-            song_id: currentSongId,
-            rating: editing.rating,
-            comment: editing.comment,
-            updated_at: new Date().toISOString(),
-        }, {
-            onConflict: "user_id,song_id",
-        });
+    }, [
+        dirty,
+        loadingNext,
+        editing,
+        currentSongId,
+        saveRating,
+        fetchRatings,
+        switchSong,
+        getUserId
+    ]);
 
-    console.log("supabase upsert error =", error);
-
-    if (error) {
-        alert("评分保存失败");
-        setSubmitted(false);
-        setLoadingNext(false);
-        return;
-    }
-
-    setDirty(false);
-
-    // ⭐关键：刷新数据
-    const updated = await refreshRatings();
-
-    const unRatedSongs = songs.filter(s =>
-        s.id !== 0 && !updated[s.id]
-    );
-
-    if (unRatedSongs.length > 0) {
-        const nextSong =
-            unRatedSongs[Math.floor(Math.random() * unRatedSongs.length)];
-
-        await switchSong(nextSong.id);
-    } else {
-        alert("🎉 恭喜！所有歌曲已经全部完成！");
-    }
-
-    setSubmitted(false);
-    setLoadingNext(false);
-};
     // ========================
     // 统计
     // ========================
@@ -294,7 +274,8 @@ export function useRating() {
         totalCount,
         finishedCount,
         goPrevSong,
-        dirty,setDirty,
         goNextSongSequential,
+        dirty,
+        setDirty,
     };
 }
