@@ -147,10 +147,14 @@ const nickname =
     user?.user_metadata?.username ||
     user?.email ||
     "unknown";
-    
-console.log({
-  nickname,
-  type: typeof nickname
+
+console.log("DEBUG nickname =", nickname);
+console.log("DEBUG payload =", {
+  user_id,
+  songId,
+  rating,
+  comment,
+  nickname
 });
 const { error } = await supabase
     .from("rating")
