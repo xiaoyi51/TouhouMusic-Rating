@@ -2,7 +2,7 @@ import { songs } from "@/data/songs";
 import { useEffect, useState, useCallback } from "react";
 import type { RatingRecord } from "@/data/rating";
 import { supabase } from "@/lib/supabase";
-import { useSearchParams } from "next/navigation";
+
 
 type EditingState = {
     rating: number;
@@ -16,23 +16,20 @@ type RatingRow = {
     updated_at: string;
 };
 
-export function useRating() {
+export function useRating(initialSongId: number) {
 
     // ========================
     // 当前歌曲
     // ========================
-const searchParams = useSearchParams();
-const urlSongId = Number(searchParams.get("songId"));
+
 const [currentSongId, setCurrentSongId] = useState<number>(() => {
-    if (typeof window === "undefined") return 1;
+    if (typeof window === "undefined") return initialSongId || 1;
 
-    // 1️⃣ URL 优先
-    if (urlSongId && !Number.isNaN(urlSongId) && urlSongId > 0) {
-        return urlSongId;
-    }
+    const saved = Number(localStorage.getItem("currentSongId"));
 
-    // 2️⃣ fallback localStorage
-    return Number(localStorage.getItem("currentSongId")) || 1;
+    if (saved) return saved;
+
+    return initialSongId || 1;
 });
 
 
