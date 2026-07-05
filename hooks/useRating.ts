@@ -64,32 +64,53 @@ const [currentSongId, setCurrentSongId] = useState<number>(() => {
     // ========================
     // fetch ratings（纯函数）
     // ========================
+
     const fetchRatings = useCallback(async () => {
-        const user_id = await getUserId();
-        if (!user_id) return {};
+    const user_id = await getUserId();
+    if (!user_id) return {};
 
-        const { data, error } = await supabase
-            .from("rating_with_user")
-            .select("song_id, rating, comment, updated_at,username")
-            .eq("user_id", user_id);
+    // 1. 只查 rating（绝对稳定）
+    const { data: ratings, error } = await supabase
+        .from("rating")
+        .select("song_id, rating, comment, updated_at, user_id")
+        .eq("user_id", user_id);
 
-        if (error) {
-            console.error("fetchRatings error:", error);
-            return {};
-        }
+    if (error) {
+        console.error("fetchRatings error:", error);
+        return {};
+    }
 
-        const map: Record<number, RatingRecord> = {};
+    if (!ratings) return {};
 
-        data?.forEach((item: RatingRow) => {
-            map[item.song_id] = {
-                rating: item.rating,
-                comment: item.comment,
-                updatedAt: item.updated_at,
-            };
-        });
+    // 2. 收集 user_id（去重）
+    const userIds = [...new Set(ratings.map(r => r.user_id))];
 
-        return map;
-    }, [getUserId]);
+    // 3. 查用户信息（安全方式：auth.getUser 不行，所以走 profile / metadata）
+    const { data: authData } = await supabase.auth.getUser();
+
+    const currentUser = authData?.user;
+
+    const nickname =
+        currentUser?.user_metadata?.username ||
+        currentUser?.email ||
+        currentUser?.id;
+
+    // 4. 如果你只需要“当前用户评分列表”，其实直接用这个就够
+    const map: Record<number, RatingRecord> = {};
+
+    ratings.forEach((item) => {
+        map[item.song_id] = {
+            rating: item.rating,
+            comment: item.comment,
+            updatedAt: item.updated_at,
+
+            // ⭐ 直接用当前用户昵称（最稳，不炸）
+            nickname: nickname
+        };
+    });
+
+    return map;
+}, [getUserId]);
 
     // ========================
     // 初始化加载（修复 React warning）
