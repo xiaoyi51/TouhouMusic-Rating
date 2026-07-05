@@ -108,6 +108,7 @@ export function useRating() {
         comment: string
     ) => {
         const user_id = await getUserId();
+        console.log("DEBUG user_id =", user_id);
         if (!user_id) return false;
 
         const { error } = await supabase
