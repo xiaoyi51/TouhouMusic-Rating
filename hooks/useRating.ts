@@ -144,7 +144,7 @@ const [currentSongId, setCurrentSongId] = useState<number>(() => {
         const { data: userData } = await supabase.auth.getUser();
 
     const email =
-        userData.user?.user_metadata?.username ||
+        userData.user?.user_metadata?.nickname ||
         userData.user?.email ||
         "unknown";
 
