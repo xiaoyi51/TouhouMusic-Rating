@@ -69,8 +69,8 @@ const [currentSongId, setCurrentSongId] = useState<number>(() => {
         if (!user_id) return {};
 
         const { data, error } = await supabase
-            .from("rating")
-            .select("song_id, rating, comment, updated_at")
+            .from("rating_with_user")
+            .select("song_id, rating, comment, updated_at,username")
             .eq("user_id", user_id);
 
         if (error) {
