@@ -143,10 +143,13 @@ const [currentSongId, setCurrentSongId] = useState<number>(() => {
 
         const { data: userData } = await supabase.auth.getUser();
 
-    const email =
-        userData.user?.user_metadata?.nickname ||
-        userData.user?.email ||
-        "unknown";
+const user = userData.user;
+
+const nickname =
+    user?.user_metadata?.username ||
+    user?.user_metadata?.nickname ||
+    user?.email ||
+    null;
 
         const { error } = await supabase
             .from("rating")
@@ -156,7 +159,7 @@ const [currentSongId, setCurrentSongId] = useState<number>(() => {
                 rating,
                 comment,
                 updated_at: new Date().toISOString(),
-                nickname: email
+                nickname,
             }, {
                 onConflict: "user_id,song_id",
             });
