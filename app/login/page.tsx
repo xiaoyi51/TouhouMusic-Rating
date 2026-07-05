@@ -14,58 +14,33 @@ export default function LoginPage() {
   const [error, setError] = useState("");
 
   async function handleLogin() {
-
   setLoading(true);
   setError("");
 
-  console.log("login start");
-
-  const { data, error } = await supabase
-    .from("users")
-    .select("*");
-
-  console.log("ALL USERS:", data);
-  console.log("ERROR:", error);
-
-  setLoading(false);
-
-
-    setLoading(true);
-    setError("");
-
-    if (!nickname || !password) {
-      setError("请输入昵称和密码");
-      setLoading(false);
-      return;
-    }
-
-    // 1. 查询用户
-    const { data: user, error: queryError } = await supabase
-  .from("users")
-  .select("*")
-  .eq("nickname", nickname)
-  .maybeSingle();
-
-if (queryError || !user) {
-  setError("用户不存在");
-  setLoading(false);
-  return;
-}
-
-    // 2. 密码校验（当前简化版）
-    if (password !== user.password_hash) {
-      setError("密码错误");
-      setLoading(false);
-      return;
-    }
-
-    // 3. 登录成功
-    localStorage.setItem("user_id", user.id);
-    localStorage.setItem("nickname", user.nickname);
-
+  if (!nickname || !password) {
+    setError("请输入昵称和密码");
     setLoading(false);
-    router.push("/rating");
+    return;
   }
+
+  // ✅ 1. 用 Supabase Auth 登录（新增方式）
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: nickname + "@temp.com", // 👈 临时方案（关键）
+    password,
+  });
+
+  if (error || !data.user) {
+    setError("登录失败：" + (error?.message || ""));
+    setLoading(false);
+    return;
+  }
+
+  // ✅ 2. 不再用 localStorage user_id
+  // Supabase 自动管理 session
+
+  setLoading(false);
+  router.push("/rating");
+}
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-stone-50 text-stone-800">

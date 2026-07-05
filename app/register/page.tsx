@@ -30,39 +30,25 @@ export default function RegisterPage() {
 
   setLoading(true);
 
-  // 1. 检查是否存在
-  const { data: exist } = await supabase
-    .from("users")
-    .select("id")
-    .eq("nickname", nickname)
-    .maybeSingle();
+  // 🟢 关键：用 Supabase Auth 注册
+  const { data, error } = await supabase.auth.signUp({
+    email: nickname + "@temp.com", // 👈 保持你原来的“昵称体系”
+    password,
+  });
 
-  if (exist) {
-    setError("昵称已存在");
-    setLoading(false);
-    return;
-  }
-
-  // 2. ⚠️ 简化密码（先不 hash，避免 Cloudflare / browser 问题）
-  const password_hash = password;
-
-  // 3. 插入用户
-  const { data, error } = await supabase
-    .from("users")
-    .insert([
-      {
-        nickname,
-        password_hash,
-      },
-    ])
-    .select()
-    .single();
-
-  if (error || !data) {
+  if (error || !data.user) {
     setError(error?.message || "注册失败");
     setLoading(false);
     return;
   }
+
+  // 🟡 可选：写入 profiles / users（只存昵称，不存密码）
+  await supabase.from("users").insert([
+    {
+      id: data.user.id,
+      nickname,
+    },
+  ]);
 
   setLoading(false);
 
