@@ -72,7 +72,7 @@ const [currentSongId, setCurrentSongId] = useState<number>(() => {
     // 1. 只查 rating（绝对稳定）
     const { data: ratings, error } = await supabase
         .from("rating")
-        .select("song_id, rating, comment, updated_at, user_id")
+        .select("song_id, rating, comment, updated_at, nickname")
         .eq("user_id", user_id);
 
     if (error) {
@@ -82,8 +82,6 @@ const [currentSongId, setCurrentSongId] = useState<number>(() => {
 
     if (!ratings) return {};
 
-    // 2. 收集 user_id（去重）
-    const userIds = [...new Set(ratings.map(r => r.user_id))];
 
     // 3. 查用户信息（安全方式：auth.getUser 不行，所以走 profile / metadata）
     const { data: authData } = await supabase.auth.getUser();
