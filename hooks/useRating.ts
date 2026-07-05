@@ -142,27 +142,28 @@ const [currentSongId, setCurrentSongId] = useState<number>(() => {
         if (!user_id) return false;
 
         const { data: userData } = await supabase.auth.getUser();
-
 const user = userData.user;
 
 const nickname =
-    user?.user_metadata?.username ||
-    user?.user_metadata?.nickname ||
-    user?.email ||
-    null;
+    user?.user_metadata?.username ??
+    user?.user_metadata?.nickname ??
+    user?.email ??
+    "unknown";
 
-        const { error } = await supabase
-            .from("rating")
-            .upsert({
-                user_id,
-                song_id: songId,
-                rating,
-                comment,
-                updated_at: new Date().toISOString(),
-                nickname,
-            }, {
-                onConflict: "user_id,song_id",
-            });
+console.log("FINAL nickname =", nickname);
+
+const { error } = await supabase
+    .from("rating")
+    .upsert({
+        user_id,
+        song_id: songId,
+        rating,
+        comment,
+        updated_at: new Date().toISOString(),
+        nickname
+    }, {
+        onConflict: "user_id,song_id",
+    });
 
         if (error) {
             console.error("saveRating error:", error);
