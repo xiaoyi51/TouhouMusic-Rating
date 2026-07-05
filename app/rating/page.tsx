@@ -8,6 +8,7 @@ import { songs } from "@/data/songs";
 import { useRating } from "@/hooks/useRating";
 import SongList from "../components/Songlist";
 import {Sheet,SheetContent,SheetHeader,SheetTitle,} from "@/components/ui/sheet";
+export const dynamic = "force-dynamic";
 export default function RatingPage() {
 
     const {
