@@ -141,17 +141,17 @@ const [currentSongId, setCurrentSongId] = useState<number>(() => {
         console.log("DEBUG user_id =", user_id);
         if (!user_id) return false;
 
-        const { data: userData } = await supabase.auth.getUser();
-const user = userData.user;
+        const { data: { user } } = await supabase.auth.getUser();
 
 const nickname =
-    user?.user_metadata?.username ??
-    user?.user_metadata?.nickname ??
-    user?.email ??
+    user?.user_metadata?.username ||
+    user?.email ||
     "unknown";
-
-console.log("FINAL nickname =", nickname);
-
+    
+console.log({
+  nickname,
+  type: typeof nickname
+});
 const { error } = await supabase
     .from("rating")
     .upsert({
