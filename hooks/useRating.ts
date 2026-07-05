@@ -158,7 +158,7 @@ const [currentSongId, setCurrentSongId] = useState<number>(() => {
                 rating,
                 comment,
                 updated_at: new Date().toISOString(),
-                user_email: email
+                nickname: email
             }, {
                 onConflict: "user_id,song_id",
             });
