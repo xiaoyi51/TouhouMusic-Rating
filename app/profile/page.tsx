@@ -13,135 +13,143 @@ type RatingItem = {
 
 export default function ProfilePage() {
 
+    const [userId, setUserId] = useState<string | null>(null);
     const [ratings, setRatings] = useState<RatingItem[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // ===== 编辑状态 =====
     const [editingId, setEditingId] = useState<number | null>(null);
     const [tempRating, setTempRating] = useState(5);
     const [tempComment, setTempComment] = useState("");
 
-    // ===== 获取歌曲名 =====
+    // ========================
+    // 获取当前用户（安全核心）
+    // ========================
+    useEffect(() => {
+        const init = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+                setLoading(false);
+                return;
+            }
+
+            setUserId(user.id);
+
+            const { data, error } = await supabase
+                .from("rating")
+                .select("song_id, rating, comment, updated_at")
+                .eq("user_id", user.id);
+
+            if (error) {
+                console.error(error);
+            } else {
+                setRatings(data || []);
+            }
+
+            setLoading(false);
+        };
+
+        init();
+    }, []);
+
+    // ========================
+    // 歌曲名
+    // ========================
     function getSongTitle(id: number) {
         return songs.find(s => s.id === id)?.title ?? "未知歌曲";
     }
 
-    // ===== 加载数据 =====
-    useEffect(() => {
-        async function load() {
-            const user_id = localStorage.getItem("user_id");
-            if (!user_id) return;
+    // ========================
+    // 删除评分（安全版）
+    // ========================
+    async function deleteRating(song_id: number) {
+        if (!userId) return;
 
-            const { data, error } = await supabase
-                .from("rating")
-                .select("*")
-                .eq("user_id", user_id);
+        const { error } = await supabase
+            .from("rating")
+            .delete()
+            .eq("user_id", userId)
+            .eq("song_id", song_id);
 
-            if (error) {
-                console.error(error);
-                return;
-            }
-
-            setRatings(data || []);
-            setLoading(false);
+        if (error) {
+            console.error("delete error:", error);
+            alert("删除失败");
+            return;
         }
 
-        load();
-    }, []);
-
-    // ===== 删除评分 =====
-async function deleteRating(user_id: string, song_id: number) {
-    const { error } = await supabase
-        .from("rating")
-        .delete()
-        .eq("user_id", user_id)
-        .eq("song_id", song_id);
-
-    if (error) {
-        console.error(error);
-        return false;
-    }
-    const ok = await deleteRating(user_id, song_id);
-
-if (!ok) {
-    alert("删除失败");
-}
-    return true;
-}
-
-
-    // ===== 删除账号 =====
- async function deleteAccount() {
-    const user_id = localStorage.getItem("user_id");
-    if (!user_id) return;
-
-    // 1. 删除评分
-    const { error: ratingError } = await supabase
-        .from("rating")
-        .delete()
-        .eq("user_id", user_id);
-
-    if (ratingError) {
-        console.error(ratingError);
-        alert("删除评分失败");
-        return;
+        setRatings(prev => prev.filter(r => r.song_id !== song_id));
     }
 
-    // 2. 删除用户
-    const { error: userError } = await supabase
-        .from("users")
-        .delete()
-        .eq("id", user_id);
-
-    if (userError) {
-        console.error(userError);
-        alert("删除用户失败");
-        return;
-    }
-
-    // 3. 成功后清理本地状态
-    localStorage.removeItem("user_id");
-    window.location.href = "/";
-}
-
-    // ===== 保存修改评分 =====
+    // ========================
+    // 修改评分（安全版）
+    // ========================
     async function saveEdit(song_id: number) {
-        const user_id = localStorage.getItem("user_id");
+        if (!userId) return;
 
-        const res = await supabase
+        const { error } = await supabase
             .from("rating")
             .update({
                 rating: tempRating,
                 comment: tempComment,
                 updated_at: new Date().toISOString(),
             })
-            .eq("user_id", user_id)
+            .eq("user_id", userId)
             .eq("song_id", song_id);
 
-        if (!res.error) {
-            setRatings(prev =>
-                prev.map(r =>
-                    r.song_id === song_id
-                        ? { ...r, rating: tempRating, comment: tempComment }
-                        : r
-                )
-            );
-
-            setEditingId(null);
+        if (error) {
+            console.error(error);
+            alert("更新失败");
+            return;
         }
+
+        setRatings(prev =>
+            prev.map(r =>
+                r.song_id === song_id
+                    ? { ...r, rating: tempRating, comment: tempComment }
+                    : r
+            )
+        );
+
+        setEditingId(null);
     }
 
+    // ========================
+    // 删除账号（安全版）
+    // ⚠️ 这里只做退出登录 + 清理数据
+    // ========================
+    async function deleteAccount() {
+        if (!userId) return;
+
+        const { error } = await supabase
+            .from("rating")
+            .delete()
+            .eq("user_id", userId);
+
+        if (error) {
+            alert("清理数据失败");
+            return;
+        }
+
+        await supabase.auth.signOut();
+
+        window.location.href = "/";
+    }
+
+    // ========================
+    // loading
+    // ========================
     if (loading) {
         return <div className="p-10">加载中...</div>;
+    }
+
+    if (!userId) {
+        return <div className="p-10">请先登录</div>;
     }
 
     return (
         <main className="max-w-2xl mx-auto p-6 space-y-6">
 
-            {/* 标题 */}
-            <h1 className="text-2xl font-bold">
-                个人中心
-            </h1>
+            <h1 className="text-2xl font-bold">个人中心</h1>
 
             {/* 删除账号 */}
             <button
@@ -151,34 +159,28 @@ if (!ok) {
                 删除账号（不可恢复）
             </button>
 
-            {/* 评分列表 */}
             <div className="space-y-4">
 
                 {ratings.map(item => (
                     <div
-                        key={item.song_id}
+                        key={`${item.song_id}-${item.updated_at}`}
                         className="border rounded-xl p-4 bg-white shadow-sm space-y-2"
                     >
 
-                        {/* 歌曲名 */}
                         <div className="font-medium">
                             {getSongTitle(item.song_id)}
                         </div>
 
-                        {/* 评分 */}
                         <div className="text-sm text-stone-600">
                             评分：<span className="font-semibold">{item.rating}</span>
                         </div>
 
-                        {/* 评论 */}
                         <div className="text-sm text-stone-500">
                             {item.comment}
                         </div>
 
-                        {/* 操作按钮 */}
                         <div className="space-x-3 text-sm">
 
-                            {/* 修改 */}
                             <button
                                 className="text-blue-500"
                                 onClick={() => {
@@ -190,16 +192,15 @@ if (!ok) {
                                 修改
                             </button>
 
-                            {/* 删除 */}
                             <button
                                 className="text-red-500"
-                                onClick={() => deleteRating(item.comment,item.song_id)}
+                                onClick={() => deleteRating(item.song_id)}
                             >
                                 删除
                             </button>
+
                         </div>
 
-                        {/* 编辑区域 */}
                         {editingId === item.song_id && (
                             <div className="mt-3 border-t pt-3 space-y-2">
 
@@ -223,6 +224,7 @@ if (!ok) {
                                 />
 
                                 <div className="space-x-2">
+
                                     <button
                                         className="text-green-600"
                                         onClick={() => saveEdit(item.song_id)}
@@ -236,8 +238,8 @@ if (!ok) {
                                     >
                                         取消
                                     </button>
-                                </div>
 
+                                </div>
                             </div>
                         )}
 
