@@ -16,6 +16,7 @@ export default function ProfilePage() {
     const [userId, setUserId] = useState<string | null>(null);
     const [ratings, setRatings] = useState<RatingItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
 
     const [editingId, setEditingId] = useState<number | null>(null);
     const [tempRating, setTempRating] = useState(5);
@@ -146,10 +147,37 @@ export default function ProfilePage() {
         return <div className="p-10">请先登录</div>;
     }
 
+    const sortedRatings = [...ratings].sort((a, b) => {
+    return sortOrder === "desc"
+        ? b.rating - a.rating
+        : a.rating - b.rating;
+});
+
     return (
         <main className="max-w-2xl mx-auto p-6 space-y-6">
 
             <h1 className="text-2xl font-bold">个人中心</h1>
+            <div className="flex gap-2 text-sm mt-2">
+
+    <button
+        onClick={() => setSortOrder("desc")}
+        className={`px-3 py-1 border rounded ${
+            sortOrder === "desc" ? "bg-black text-white" : ""
+        }`}
+    >
+        🔼 高 → 低
+    </button>
+
+    <button
+        onClick={() => setSortOrder("asc")}
+        className={`px-3 py-1 border rounded ${
+            sortOrder === "asc" ? "bg-black text-white" : ""
+        }`}
+    >
+        🔽 低 → 高
+    </button>
+
+</div>
 
             {/* 删除账号 */}
             <button
@@ -161,7 +189,7 @@ export default function ProfilePage() {
 
             <div className="space-y-4">
 
-                {ratings.map(item => (
+                {sortedRatings.map(item => (
                     <div
                         key={`${item.song_id}-${item.updated_at}`}
                         className="border rounded-xl p-4 bg-white shadow-sm space-y-2"
