@@ -367,26 +367,6 @@ const [songListOpen, setSongListOpen] = useState(false);
 
 </div>
 
-    {/* 内容 */}
-    <div className="space-y-5">
-        {song.description.map((paragraph, index) => (
-            <p
-                key={index}
-                className="
-                    indent-[2em]
-                    leading-9
-                    text-[15px]
-                    text-[#5d544d]
-                    tracking-normal
-                    whitespace-pre-line
-                    text-left
-                "
-            >
-                {paragraph}
-            </p>
-        ))}
-    </div>
-
 </div>
 
         </div>
@@ -529,26 +509,6 @@ const [songListOpen, setSongListOpen] = useState(false);
     </div>
 
 </div>
-
-    {/* 内容 */}
-    <div className="space-y-5">
-        {song.introduction.map((paragraph, index) => (
-            <p
-                key={index}
-                className="
-                    indent-[2em]
-                    leading-9
-                    text-[15px]
-                    text-[#5d544d]
-                    tracking-normal
-                    whitespace-pre-line
-                    text-left
-                "
-            >
-                {paragraph}
-            </p>
-        ))}
-    </div>
 
 </div>
 
