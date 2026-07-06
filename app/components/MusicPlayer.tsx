@@ -24,14 +24,12 @@ export default function MusicPlayer({
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
 
-  // 音量变化
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
     }
   }, [volume]);
 
-  // 自动播放（如果浏览器允许）
   useEffect(() => {
     if (!autoPlay || !audioRef.current) return;
 
@@ -40,25 +38,23 @@ export default function MusicPlayer({
     }).catch(() => {});
   }, [autoPlay]);
 
-  // 监听播放进度
-useEffect(() => {
-  const audio = audioRef.current;
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
 
-  if (!audio) return;
+    const updateProgress = () => {
+      setProgress(audio.currentTime);
+      setDuration(audio.duration || 0);
+    };
 
-  const updateProgress = () => {
-    setProgress(audio.currentTime);
-    setDuration(audio.duration || 0);
-  };
+    audio.addEventListener("timeupdate", updateProgress);
+    audio.addEventListener("loadedmetadata", updateProgress);
 
-  audio.addEventListener("timeupdate", updateProgress);
-  audio.addEventListener("loadedmetadata", updateProgress);
-
-  return () => {
-    audio.removeEventListener("timeupdate", updateProgress);
-    audio.removeEventListener("loadedmetadata", updateProgress);
-  };
-}, []);
+    return () => {
+      audio.removeEventListener("timeupdate", updateProgress);
+      audio.removeEventListener("loadedmetadata", updateProgress);
+    };
+  }, []);
 
   const togglePlay = async () => {
     if (!audioRef.current) return;
@@ -73,134 +69,100 @@ useEffect(() => {
       } catch {}
     }
   };
-  const handleProgressChange = (
-  e: React.ChangeEvent<HTMLInputElement>
-) => {
-  if (!audioRef.current) return;
 
-  const value = Number(e.target.value);
+  const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!audioRef.current) return;
 
-  audioRef.current.currentTime = value;
-
-  setProgress(value);
-};
+    const value = Number(e.target.value);
+    audioRef.current.currentTime = value;
+    setProgress(value);
+  };
 
   return (
     <>
-      <audio
-        ref={audioRef}
-        src={getAudioUrl(song.audio)}
-        loop
-      />
+      <audio ref={audioRef} src={getAudioUrl(song.audio)} loop />
 
       <div
-  className="
-rounded-2xl
-border
-border-stone-300/70
-bg-white/75
-backdrop-blur-md
-p-4
-shadow-lg
-"
->
+        className="
+          rounded-2xl
+          border
+          border-stone-300/70
+          bg-white/75
+          backdrop-blur-md
+          p-4
+          shadow-lg
 
-  {/* 标题 */}
-  <div className="text-xs tracking-[0.3em] text-stone-500">
+          /* ✅ 手机端优化 */
+          w-full
+          max-w-[420px]
+          md:max-w-none
+          mx-auto
+          md:mx-0
+        "
+      >
+        {/* 标题（手机缩小） */}
+        <div className="text-[10px] md:text-xs tracking-[0.3em] text-stone-500">
+          ☯ NOW PLAYING
+        </div>
 
-    ☯ NOW PLAYING
+        {/* 曲名 */}
+        <div className="mt-2 md:mt-3 text-lg md:text-xl font-semibold text-stone-800">
+          {song.title}
+        </div>
 
-  </div>
+        {/* 作品名 */}
+        <div className="mt-1 text-xs md:text-sm text-stone-500">
+          {song.game}
+        </div>
 
-  {/* 曲名 */}
-  <div className="mt-3 text-xl font-semibold text-stone-800">
+        {/* 副标题（手机隐藏，避免占空间） */}
+        <div className="hidden md:block italic text-xs text-stone-400">
+          ～ {song.subimage} ～
+        </div>
 
-    {song.title}
+        <div className="my-3 border-t border-stone-200" />
 
-  </div>
+        {/* 进度条（手机更紧凑） */}
+        <div className="mb-3 md:mb-4">
+          <input
+            type="range"
+            min={0}
+            max={duration || 0}
+            value={progress}
+            onChange={handleProgressChange}
+            className="w-full accent-stone-600"
+          />
+        </div>
 
-  {/* 作品名 */}
-  <div className="mt-1 text-sm text-stone-500">
+        {/* 控制栏（手机压缩 spacing） */}
+        <div className="flex items-center gap-3 md:gap-4">
 
-    {song.game}
+          <button
+            onClick={togglePlay}
+            className="
+              h-8 w-8 md:h-9 md:w-9
+              rounded-full
+              border border-stone-400
+              transition
+              hover:bg-stone-100
+            "
+          >
+            {playing ? "❚❚" : "▶"}
+          </button>
 
-  </div>
+          <span className="text-sm md:text-base">♪</span>
 
-  {/* 副标题 */}
-  <div className="italic text-xs text-stone-400">
-
-    ～ {song.subimage} ～
-
-  </div>
-
-  {/* 分隔线 */}
-  <div className="my-3 border-t border-stone-200" />
-
-{/* 播放进度 */}
-<div className="mb-4">
-
-  <input
-    type="range"
-    min={0}
-    max={duration || 0}
-    value={progress}
-    onChange={handleProgressChange}
-    className="
-      w-full
-      accent-stone-600
-    "
-  />
-
-</div>
-  {/* 控制栏 */}
-  <div className="flex items-center gap-4">
-
-    {/* 播放按钮 */}
-
-    <button
-      onClick={togglePlay}
-      className="
-      h-9
-      w-9
-      rounded-full
-      border
-      border-stone-400
-      transition
-      hover:bg-stone-100
-      "
-    >
-
-      {playing ? "❚❚" : "▶"}
-
-    </button>
-
-    {/* 音量 */}
-
-    <span className="text-base">
-
-      ♪
-
-    </span>
-
-    <input
-      type="range"
-      min={0}
-      max={1}
-      step={0.01}
-      value={volume}
-      onChange={(e) =>
-        setVolume(Number(e.target.value))
-      }
-      className="
-      flex-1
-      accent-stone-600
-      "
-    />
-
-  </div>
-
-</div>
-
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={volume}
+            onChange={(e) => setVolume(Number(e.target.value))}
+            className="flex-1 accent-stone-600"
+          />
+        </div>
+      </div>
     </>
   );
 }
