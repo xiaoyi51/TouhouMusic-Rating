@@ -16,20 +16,35 @@ type RatingRow = {
     updated_at: string;
 };
 
-export function useRating(initialSongId: number) {
+const getUrlSongId = () => {
+    if (typeof window === "undefined") return null;
+
+    const params = new URLSearchParams(window.location.search);
+    const id = Number(params.get("songId"));
+
+    if (!Number.isNaN(id) && id > 0) return id;
+
+    return null;
+};
+export function useRating() {
 
     // ========================
     // 当前歌曲
     // ========================
 
 const [currentSongId, setCurrentSongId] = useState<number>(() => {
-    if (typeof window === "undefined") return initialSongId || 1;
+    if (typeof window === "undefined") return  1;
 
+    // 1️⃣ URL 优先（安全版，不触发 SSR）
+    const urlSongId = getUrlSongId();
+    if (urlSongId) return urlSongId;
+
+    // 2️⃣ localStorage
     const saved = Number(localStorage.getItem("currentSongId"));
-
     if (saved) return saved;
 
-    return initialSongId || 1;
+    // 3️⃣ fallback
+    return  1;
 });
 
 

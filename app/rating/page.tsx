@@ -8,10 +8,7 @@ import { songs } from "@/data/songs";
 import { useRating } from "@/hooks/useRating";
 import SongList from "../components/Songlist";
 import {Sheet,SheetContent,SheetHeader,SheetTitle,} from "@/components/ui/sheet";
-import { useSearchParams } from "next/navigation";
 export default function RatingPage() {
-    const searchParams = useSearchParams();
-    const urlSongId = Number(searchParams.get("songId")) || 1;
 
     const {
     song,
@@ -29,7 +26,7 @@ export default function RatingPage() {
     ratingsMap,
     setDirty,
 
-} = useRating(urlSongId);
+} = useRating();
 const [songListOpen, setSongListOpen] = useState(false);
 
     return (
