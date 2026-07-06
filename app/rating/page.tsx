@@ -229,7 +229,7 @@ const [songListOpen, setSongListOpen] = useState(false);
 <div className="my-12 h-px bg-[#ece3db]" />
 {/* ================= Song Detail ================= */}
 
-<section className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-2">
+<section className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-2 items-start">
 
     {/* ================= 左侧：歌曲信息 ================= */}
 
@@ -242,7 +242,7 @@ const [songListOpen, setSongListOpen] = useState(false);
             border-[#eadfd5]
             bg-[#fffdfb]
             p-8
-            shadow-[0_8px_28px_rgba(80,60,50,.06)]
+            shadow-[0_8px_28px_rgba(80,60,50,.06)] flex-1 min-w-0
         "
     >
         {/* 标题 */}
@@ -370,8 +370,7 @@ const [songListOpen, setSongListOpen] = useState(false);
         >
             ❀
         </div>
-
-    </div>
+</div>
 
     {/* ================= 右侧：相关角色 ================= */}
 
@@ -384,7 +383,7 @@ const [songListOpen, setSongListOpen] = useState(false);
             border-[#eadfd5]
             bg-[#fffdfb]
             p-8
-            shadow-[0_8px_28px_rgba(80,60,50,.06)]
+            shadow-[0_8px_28px_rgba(80,60,50,.06)]  flex-1 min-w-0
         "
     >
 
