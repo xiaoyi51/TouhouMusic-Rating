@@ -80,7 +80,7 @@ const [songListOpen, setSongListOpen] = useState(false);
         </div>
     </header>
     {/* ================= Main ================= */}
-    <div className="mx-auto max-w-6xl px-8 py-10">
+    <div className="mx-auto max-w-6xl px-4 sm:px-8 py-6 sm:py-10">
 
         {/* ================= Main Card ================= */}
         <section className="rounded-[28px] border border-[#eadfd5] bg-white/75 shadow-[0_8px_30px_rgba(70,50,40,0.08)] backdrop-blur-sm p-10">
@@ -150,26 +150,25 @@ const [songListOpen, setSongListOpen] = useState(false);
 </Link>
 {/* ================= Hero ================= */}
 
-<section className="grid grid-cols-[340px_1fr] gap-14 items-center min-h-95" >
+<section className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-8 lg:gap-14 items-center">
 
     {/* ---------- 左侧角色立绘 ---------- */}
 
-<div
-    className="
-        relative
-        flex
-        h-90
-        w-[320px]
-        items-end
-        justify-center
-        overflow-hidden
-        rounded-2xl
-        border
-        border-[#eadfd5]
-        bg-[#faf8f4]
-        shadow-md
-    "
-><div className="absolute bottom-0 h-40 w-40 rounded-full bg-[#eadfd5] blur-3xl opacity-60" />
+<div className="
+    relative
+    flex
+    h-72 sm:h-90
+    w-full sm:w-[320px]
+    items-end
+    justify-center
+    overflow-hidden
+    rounded-2xl
+    border
+    border-[#eadfd5]
+    bg-[#faf8f4]
+    shadow-md
+">
+    <div className="absolute bottom-0 h-40 w-40 rounded-full bg-[#eadfd5] blur-3xl opacity-60" />
     <Image
         src={song.image}
         alt={song.title}
@@ -187,11 +186,11 @@ const [songListOpen, setSongListOpen] = useState(false);
 </div>
     {/* ---------- 右侧 ---------- */}
 
-    <div className="flex h-full flex-col justify-start pt-4">
+    <div className="flex h-full flex-col justify-start pt-2 sm:pt-4">
 
         {/* 曲名 */}
 
-        <h2 className="font-serif text-[42px] font-semibold leading-tight text-[#3f3432]">
+        <h2 className="font-serif text-2xl sm:text-[42px] font-semibold leading-tight text-[#3f3432]">
 
             {song.title}
 
@@ -499,7 +498,7 @@ const [songListOpen, setSongListOpen] = useState(false);
 {/* ================= Rating Panel ================= */}
 
 <section className="mt-12 overflow-hidden rounded-3xl border border-[#eadfd5] bg-[#fffdfb] shadow-[0_8px_28px_rgba(80,60,50,.06)]">
-    <div className="grid lg:grid-cols-2"></div>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
     {/* ================= 左侧：评分 ================= */}
 
     <div
@@ -524,7 +523,7 @@ const [songListOpen, setSongListOpen] = useState(false);
 
         <div className="mt-8 text-center">
 
-            <p className="text-6xl font-bold text-[#403735]">
+            <p className="text-4xl sm:text-6xl font-bold text-[#403735]">
 
                 {editing.rating.toFixed(2)}
 
