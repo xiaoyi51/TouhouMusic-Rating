@@ -315,25 +315,7 @@ const [songListOpen, setSongListOpen] = useState(false);
 
         </div>
 
-        {/* 曲目简介 */}
-
-        <div className="mt-10">
-
-            <h4 className="flex items-center gap-2 text-lg font-semibold text-[#5d4c46]">
-
-                <span className="text-[#c58b97]">
-
-                    ⓘ
-
-                </span>
-
-                曲目简介
-
-            </h4>
-
-            {/* 遮罩按钮 */}
-<div className="relative mt-4">
-{/* 曲目简介 */}
+    {/* 曲目简介 */}
 <div className="mt-10 relative">
 
     <h4 className="flex items-center gap-2 text-lg font-semibold text-[#5d4c46]">
@@ -341,6 +323,19 @@ const [songListOpen, setSongListOpen] = useState(false);
         曲目简介
     </h4>
 
+    {/* 内容 */}
+    <div className="space-y-5 mt-4">
+        {song.description.map((paragraph, index) => (
+            <p
+                key={index}
+                className="indent-[2em] leading-9 text-[15px] text-[#5d544d] tracking-normal whitespace-pre-line text-left"
+            >
+                {paragraph}
+            </p>
+        ))}
+    </div>
+
+    {/* 遮罩（一定要最后写） */}
     {!infoOpen.song && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-xl">
             <button
@@ -354,22 +349,11 @@ const [songListOpen, setSongListOpen] = useState(false);
         </div>
     )}
 
-    <div className="space-y-5 mt-4">
-        {song.description.map((paragraph, index) => (
-            <p
-                key={index}
-                className="indent-[2em] leading-9 text-[15px] text-[#5d544d] tracking-normal whitespace-pre-line text-left"
-            >
-                {paragraph}
-            </p>
-        ))}
-    </div>
-
 </div>
 
 </div>
 
-        </div>
+    <div>
 
         {/* 底部装饰 */}
 
@@ -475,13 +459,7 @@ const [songListOpen, setSongListOpen] = useState(false);
             {song.character.join("、")}
 
         </h4>
-
-        {/* 简介 */}
-
-            {/* 遮罩按钮 */}
-<div className="relative mt-4">
-
-    {/* 人物简介 */}
+{/* 人物简介 */}
 <div className="relative mt-6">
 
     {!infoOpen.character && (
@@ -507,8 +485,6 @@ const [songListOpen, setSongListOpen] = useState(false);
             </p>
         ))}
     </div>
-
-</div>
 
 </div>
 
