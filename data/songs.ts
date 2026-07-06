@@ -299,7 +299,7 @@ export const songs:Song[]=[
     composer:"ZUN",
     release:"2002",
     description:["那樱花树下，即使是现在依然还在沉睡吧。曾经是那样深红的花瓣，年复一年地愈显苍白。或许在那片土地里，已经再也没有什么留下了吧。————第二版《蓬莱人形》CD附带文档"],
-    introduction:["这首歌原本是2001年12月发布的游戏《稀翁玉》中幽香的主题曲，稀翁玉是ZUN和其他一些朋友合作的作品，但他主要只负责了音乐，这段时期的作品被称为西方project，跟后来他自己的东方project有很大差别，在2005年的东方花映冢中，zun设计了一个叫风见幽香的角色，和这个幽香外表上有相似之处，也是对旧作的一些在创作。"
+    introduction:["这首歌原本是2001年12月发布的游戏《稀翁玉》中幽香的主题曲，稀翁玉是ZUN和其他一些朋友合作的作品，但他主要只负责了音乐，这段时期的作品被称为西方project，跟后来他自己的东方project有很大差别，在2005年的东方花映冢中，zun设计了一个叫风见幽香的角色，和这个幽香外表上有相似之处，也是对旧作的一些再创作。"
       ],
 },
 {
@@ -307,7 +307,7 @@ export const songs:Song[]=[
     title:"Reincarnation",
     translation:"重生",
     game:"音乐CD 蓬莱人形",
-    audio:"/audio/hr01/hr01_010.mp3",
+    audio:"/audio/hr01/hr01_10.mp3",
     image:"/character/hr01/hr01_01.png",
     subimage:"/character/hr01/hr01_04.png",
     character:["旧作 魅魔"],
@@ -322,7 +322,7 @@ export const songs:Song[]=[
     title:"永遠の巫女",
     translation:"永远的巫女",
     game:"音乐CD 蓬莱人形",
-    audio:"/audio/hr01/hr01_012.mp3",
+    audio:"/audio/hr01/hr01_12.mp3",
     image:"/character/hr01/hr01_01.png",
     subimage:"/character/hr01/hr01_05.png",
     character:["旧作 灵梦"],
