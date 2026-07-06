@@ -63,6 +63,8 @@ const [currentSongId, setCurrentSongId] = useState<number>(() => {
     const [submitted, setSubmitted] = useState(false);
     const [loadingNext, setLoadingNext] = useState(false);
     const [dirty, setDirty] = useState(false);
+    const [showSongInfo, setShowSongInfo] = useState(false);
+    const [showCharInfo, setShowCharInfo] = useState(false);
 
     // ========================
     // auth（统一入口）
@@ -336,5 +338,7 @@ const { error } = await supabase
         goNextSongSequential,
         dirty,
         setDirty,
+        showSongInfo, setShowSongInfo,
+        showCharInfo, setShowCharInfo,
     };
 }
