@@ -1,8 +1,7 @@
 import { songs } from "@/data/songs";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback,useRef } from "react";
 import type { RatingRecord } from "@/data/rating";
 import { supabase } from "@/lib/supabase";
-
 
 type EditingState = {
     rating: number;
@@ -62,7 +61,9 @@ const [currentSongId, setCurrentSongId] = useState<number>(() => {
     const [ratingsMap, setRatingsMap] = useState<Record<number, RatingRecord>>({});
     const [submitted, setSubmitted] = useState(false);
     const [loadingNext, setLoadingNext] = useState(false);
+    const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
     const [dirty, setDirty] = useState(false);
+    
     const [infoOpen, setInfoOpen] = useState({
     song: false,
     character: false,
@@ -164,14 +165,6 @@ const nickname =
     user?.email ||
     "unknown";
 
-console.log("DEBUG nickname =", nickname);
-console.log("DEBUG payload =", {
-  user_id,
-  songId,
-  rating,
-  comment,
-  nickname
-});
 const { error } = await supabase
     .from("rating")
     .upsert({
@@ -192,45 +185,52 @@ const { error } = await supabase
 
         return true;
     }, [getUserId]);
+    useEffect(() => {
+    if (!dirty) return;
+
+    if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+    }
+
+    saveTimerRef.current = setTimeout(async () => {
+        await saveRating(
+            currentSongId,
+            editing.rating,
+            editing.comment
+        );
+
+        const updated = await fetchRatings();
+        setRatingsMap(updated);
+
+        setDirty(false);
+    }, 800); // 0.8s 自动保存
+}, [editing.rating, editing.comment, dirty, currentSongId]);
 
     // ========================
     // 切歌
     // ========================
     const switchSong = useCallback(async (songId: number) => {
+    setCurrentSongId(songId);
+    localStorage.setItem("currentSongId", String(songId));
 
-        const current = songs.find(s => s.id === currentSongId);
-        if (!current) return;
+    setInfoOpen({
+        song: false,
+        character: false,
+    });
 
-        if (dirty) {
-            const ok = confirm("当前评分尚未保存，是否保存？");
+    setDirty(false);
 
-            if (ok) {
-                await saveRating(current.id, editing.rating, editing.comment);
-            } else {
-                return;
-            }
-        }
+    const updated = await fetchRatings();
+    setRatingsMap(updated);
 
-        setCurrentSongId(songId);
-        localStorage.setItem("currentSongId", String(songId));
-        setInfoOpen({
-    song: false,
-    character: false,
-});
+    const record = updated[songId];
 
-        setDirty(false);
+    setEditing({
+        rating: record?.rating ?? 5,
+        comment: record?.comment ?? "",
+    });
 
-        const updated = await fetchRatings();
-        setRatingsMap(updated);
-
-        const record = updated[songId];
-
-        setEditing({
-            rating: record?.rating ?? 5,
-            comment: record?.comment ?? "",
-        });
-
-    }, [currentSongId, dirty, editing, saveRating, fetchRatings]);
+}, [fetchRatings]);
 
     // ========================
     // 上一首 / 下一首
