@@ -66,22 +66,33 @@ export default function ProfilePage() {
     // 删除评分（安全版）
     // ========================
     async function deleteRating(song_id: number) {
-        if (!userId) return;
+    if (!userId) return;
 
-        const { error } = await supabase
-            .from("rating")
-            .delete()
-            .eq("user_id", userId)
-            .eq("song_id", song_id);
+    const { error } = await supabase
+        .from("rating")
+        .delete()
+        .eq("user_id", userId)
+        .eq("song_id", song_id);
 
-        if (error) {
-            console.error("delete error:", error);
-            alert("删除失败");
-            return;
-        }
-
-        setRatings(prev => prev.filter(r => r.song_id !== song_id));
+    if (error) {
+        console.error("delete error:", error);
+        alert("删除失败");
+        return;
     }
+
+    // ✅ 关键修复：重新拉取最新数据，保证 UI 和数据库一致
+    const { data, error: fetchError } = await supabase
+        .from("rating")
+        .select("song_id, rating, comment, updated_at")
+        .eq("user_id", userId);
+
+    if (fetchError) {
+        console.error(fetchError);
+        return;
+    }
+
+    setRatings(data || []);
+}
 
     // ========================
     // 修改评分（安全版）
