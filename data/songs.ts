@@ -303,7 +303,7 @@ export const songs:Song[]=[
       ],
 },
 {
-    id:18,
+    id:19,
     title:"Reincarnation",
     translation:"重生",
     game:"音乐CD 蓬莱人形",
@@ -318,7 +318,7 @@ export const songs:Song[]=[
       ],
 },
 {
-    id:19,
+    id:20,
     title:"永遠の巫女",
     translation:"永远的巫女",
     game:"音乐CD 蓬莱人形",
