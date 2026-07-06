@@ -355,10 +355,6 @@ const [songListOpen, setSongListOpen] = useState(false);
     </div>
 </div>
 
-</div>
-
-    <div>
-
         {/* 底部装饰 */}
 
         <div
