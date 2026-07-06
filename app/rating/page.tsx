@@ -315,40 +315,44 @@ const [songListOpen, setSongListOpen] = useState(false);
 
         </div>
 
-    {/* 曲目简介 */}
-<div className="mt-10 relative">
+   {/* 曲目简介 */}
+<div className="mt-10">
 
     <h4 className="flex items-center gap-2 text-lg font-semibold text-[#5d4c46]">
         <span className="text-[#c58b97]">ⓘ</span>
         曲目简介
     </h4>
 
-    {/* 内容 */}
-    <div className="space-y-5 mt-4">
-        {song.description.map((paragraph, index) => (
-            <p
-                key={index}
-                className="indent-[2em] leading-9 text-[15px] text-[#5d544d] tracking-normal whitespace-pre-line text-left"
-            >
-                {paragraph}
-            </p>
-        ))}
-    </div>
+    {/* 关键：只包内容，不改结构 */}
+    <div className="relative mt-4">
 
-    {/* 遮罩（一定要最后写） */}
-    {!infoOpen.song && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-xl">
-            <button
-                onClick={() =>
-                    setInfoOpen(prev => ({ ...prev, song: true }))
-                }
-                className="px-4 py-2 rounded-xl bg-[#866477] text-white text-sm shadow"
-            >
-                查看曲目简介
-            </button>
+        {/* 内容本体 */}
+        <div className="space-y-5">
+            {song.description.map((paragraph, index) => (
+                <p
+                    key={index}
+                    className="indent-[2em] leading-9 text-[15px] text-[#5d544d] tracking-normal whitespace-pre-line text-left"
+                >
+                    {paragraph}
+                </p>
+            ))}
         </div>
-    )}
 
+        {/* 遮罩（只覆盖，不参与布局） */}
+        {!infoOpen.song && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-xl">
+                <button
+                    onClick={() =>
+                        setInfoOpen(prev => ({ ...prev, song: true }))
+                    }
+                    className="px-4 py-2 rounded-xl bg-[#866477] text-white text-sm shadow"
+                >
+                    查看曲目简介
+                </button>
+            </div>
+        )}
+
+    </div>
 </div>
 
 </div>
@@ -462,6 +466,17 @@ const [songListOpen, setSongListOpen] = useState(false);
 {/* 人物简介 */}
 <div className="relative mt-6">
 
+    <div className="space-y-5">
+        {song.introduction.map((paragraph, index) => (
+            <p
+                key={index}
+                className="indent-[2em] leading-9 text-[15px] text-[#5d544d] tracking-normal whitespace-pre-line text-left"
+            >
+                {paragraph}
+            </p>
+        ))}
+    </div>
+
     {!infoOpen.character && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-xl">
             <button
@@ -474,17 +489,6 @@ const [songListOpen, setSongListOpen] = useState(false);
             </button>
         </div>
     )}
-
-    <div className="space-y-5">
-        {song.introduction.map((paragraph, index) => (
-            <p
-                key={index}
-                className="indent-[2em] leading-9 text-[15px] text-[#5d544d] tracking-normal whitespace-pre-line text-left"
-            >
-                {paragraph}
-            </p>
-        ))}
-    </div>
 
 </div>
 
