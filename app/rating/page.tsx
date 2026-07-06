@@ -25,8 +25,7 @@ export default function RatingPage() {
     goNextSongSequential,
     ratingsMap,
     setDirty,
-    showSongInfo, setShowSongInfo,
-    showCharInfo, setShowCharInfo,
+    infoOpen, setInfoOpen,
 } = useRating();
 const [songListOpen, setSongListOpen] = useState(false);
 
@@ -334,17 +333,39 @@ const [songListOpen, setSongListOpen] = useState(false);
 
             {/* 遮罩按钮 */}
 <div className="relative mt-4">
+{/* 曲目简介 */}
+<div className="mt-10 relative">
 
-    {!showSongInfo && (
+    <h4 className="flex items-center gap-2 text-lg font-semibold text-[#5d4c46]">
+        <span className="text-[#c58b97]">ⓘ</span>
+        曲目简介
+    </h4>
+
+    {!infoOpen.song && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-xl">
             <button
-                onClick={() => setShowSongInfo(true)}
+                onClick={() =>
+                    setInfoOpen(prev => ({ ...prev, song: true }))
+                }
                 className="px-4 py-2 rounded-xl bg-[#866477] text-white text-sm shadow"
             >
                 查看曲目简介
             </button>
         </div>
     )}
+
+    <div className="space-y-5 mt-4">
+        {song.description.map((paragraph, index) => (
+            <p
+                key={index}
+                className="indent-[2em] leading-9 text-[15px] text-[#5d544d] tracking-normal whitespace-pre-line text-left"
+            >
+                {paragraph}
+            </p>
+        ))}
+    </div>
+
+</div>
 
     {/* 内容 */}
     <div className="space-y-5">
@@ -480,16 +501,34 @@ const [songListOpen, setSongListOpen] = useState(false);
             {/* 遮罩按钮 */}
 <div className="relative mt-4">
 
-    {!showCharInfo && (
+    {/* 人物简介 */}
+<div className="relative mt-6">
+
+    {!infoOpen.character && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-xl">
             <button
-                onClick={() => setShowCharInfo(true)}
+                onClick={() =>
+                    setInfoOpen(prev => ({ ...prev, character: true }))
+                }
                 className="px-4 py-2 rounded-xl bg-[#866477] text-white text-sm shadow"
             >
-                查看人物简介
+                查看人物介绍
             </button>
         </div>
     )}
+
+    <div className="space-y-5">
+        {song.introduction.map((paragraph, index) => (
+            <p
+                key={index}
+                className="indent-[2em] leading-9 text-[15px] text-[#5d544d] tracking-normal whitespace-pre-line text-left"
+            >
+                {paragraph}
+            </p>
+        ))}
+    </div>
+
+</div>
 
     {/* 内容 */}
     <div className="space-y-5">
