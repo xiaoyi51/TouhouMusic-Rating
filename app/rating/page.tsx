@@ -607,6 +607,7 @@ const [songListOpen, setSongListOpen] = useState(false);
                     let value = Number(e.target.value);
                     if(isNaN(value)) return;
                     value=Math.min(10,Math.max(0,value));
+                    setDirty(true);
                     
                     setEditing(prev => ({
     ...prev,

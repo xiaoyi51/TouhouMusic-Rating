@@ -202,7 +202,6 @@ const { error } = await supabase
         const updated = await fetchRatings();
         setRatingsMap(updated);
 
-        setDirty(false);
     }, 800); // 0.8s 自动保存
 }, [editing.rating, editing.comment, dirty, currentSongId]);
 
