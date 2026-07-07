@@ -35,16 +35,24 @@ export default function SongList({
     const initializedRef = useRef(false);
 
     useEffect(() => {
-        if (initializedRef.current) return;
+    if (initializedRef.current) return;
 
-        const initial: Record<string, boolean> = {};
-        Object.keys(groupedSongs).forEach(key => {
-            initial[key] = true;
-        });
+    const initial: Record<string, boolean> = {};
+    Object.entries(groupedSongs).forEach(([key, groupSongs]) => {
 
-        setExpandedGroups(initial);
-        initializedRef.current = true;
-    }, [groupedSongs]);
+        const ratedCount = groupSongs.filter(
+            song => ratingsMap[song.id]
+        ).length;
+
+        // 全部评分完成 → 默认收起
+        initial[key] = ratedCount !== groupSongs.length;
+
+    });
+
+    setExpandedGroups(initial);
+    initializedRef.current = true;
+
+}, [groupedSongs, ratingsMap]);
 
     return (
         <div className="h-[calc(100vh-80px)] overflow-y-auto">
