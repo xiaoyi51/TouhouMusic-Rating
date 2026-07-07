@@ -399,7 +399,7 @@ export const songs:Song[]=[
     game:"音乐CD 莲台野夜行",
     audio:"/audio/hr01/hr02_02.mp3",
     image:"/character/hr01/hr02_01.webp",
-    subimage:"/character/hr01/hr02.webp",
+    subimage:"/character/hr01/hr02_02.webp",
     character:["秘封组 莲子 & 梅莉"],
     composer:"ZUN",
     release:"2003",
