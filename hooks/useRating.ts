@@ -171,7 +171,7 @@ const { error } = await supabase
         user_id,
         song_id: songId,
         rating,
-        comment,
+        comment : comment.replace(/\n/g, " "),
         updated_at: new Date().toISOString(),
         nickname
     }, {
