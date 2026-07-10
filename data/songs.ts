@@ -966,7 +966,7 @@ export const songs:Song[]=[
       ],
 },
 {
-    id:62,
+    id:63,
     title:"お宇佐さまの素い幡",
     translation:"宇佐大人的白旗",
     game:"东方花映塚　～ Phantasmagoria of Flower View.",
@@ -981,7 +981,7 @@ export const songs:Song[]=[
       ],
 },
 {
-    id:63,
+    id:64,
     title:"彼岸帰航　～ Riverside View",
     translation:"彼岸归航　～ Riverside View",
     game:"东方花映塚　～ Phantasmagoria of Flower View.",
@@ -996,7 +996,7 @@ export const songs:Song[]=[
       ],
 },
 {
-    id:64,
+    id:65,
     title:"六十年目の東方裁判　～ Fate of Sixty Years",
     translation:"第六十年的东方审判　～ Fate of Sixty Years",
     game:"东方花映塚　～ Phantasmagoria of Flower View.",
@@ -1011,7 +1011,7 @@ export const songs:Song[]=[
       ],
 },
 {
-    id:65,
+    id:66,
     title:"花は幻想のままに",
     translation:"花如幻想一般",
     game:"东方花映塚　～ Phantasmagoria of Flower View.",
