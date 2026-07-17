@@ -1061,7 +1061,7 @@ export const songs:Song[]=[
     title:"稲田姫様に叱られるから",
     translation:"会受稻田姬的斥责啦",
     game:"东方风神录　～ Mountain of Faith.",
-    audio:"/audio/th10/th10_3.mp3",
+    audio:"/audio/th10/th10_03.mp3",
     image:"/character/th10/th10_01_03.webp",
     subimage:"/character/th10/th10_01_01.jpg",
     character:["丰裕与收成的象征 秋穰子"],
