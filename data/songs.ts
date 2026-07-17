@@ -1045,7 +1045,7 @@ export const songs:Song[]=[
     title:"人恋し神様　～ Romantic Fall",
     translation:"眷爱众生之神　～ Romantic Fall",
     game:"东方风神录　～ Mountain of Faith.",
-    audio:"/audio/th10/th10_2.mp3",
+    audio:"/audio/th10/th10_02.mp3",
     image:"/character/th10/th10_01_02.webp",
     subimage:"/character/th10/th10_01_01.jpg",
     character:["寂寞与终焉的象征 秋静叶"],
