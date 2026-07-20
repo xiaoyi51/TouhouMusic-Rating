@@ -1349,7 +1349,7 @@ export const songs:Song[]=[
     game:"东方地灵殿　～ Subterranean Animism.",
     audio:"/audio/th11/th11_07.mp3",
     image:"/character/th11/th11_03_03.webp",
-    subimage:"/character/th11/th11_03_02.png",
+    subimage:"/character/th11/th11_03_04.webp",
     character:["被谈论的怪力乱神 星熊勇仪"],
     composer:"ZUN  ",
     release:"2008",
