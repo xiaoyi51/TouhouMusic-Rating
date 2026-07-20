@@ -1333,7 +1333,7 @@ export const songs:Song[]=[
     translation:"漫游旧地狱街道",
     game:"东方地灵殿　～ Subterranean Animism.",
     audio:"/audio/th11/th11_06.mp3",
-    image:"/character/th11/th11_03_01.webp",
+    image:"/character/th11/th11_03_01.jpg",
     subimage:"/character/th11/th11_03_02.png",
     character:["被谈论的怪力乱神 星熊勇仪"],
     composer:"ZUN  ",
